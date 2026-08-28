@@ -6,7 +6,6 @@ import com.grash.advancedsearch.SearchCriteria;
 import com.grash.dto.FilePatchDTO;
 import com.grash.dto.FileShowDTO;
 import com.grash.dto.SuccessResponse;
-import com.grash.dto.license.LicenseEntitlement;
 import com.grash.exception.CustomException;
 import com.grash.factory.StorageServiceFactory;
 import com.grash.mapper.FileMapper;
@@ -16,7 +15,6 @@ import com.grash.model.RequestPortal;
 import com.grash.model.Task;
 import com.grash.model.enums.*;
 import com.grash.service.FileService;
-import com.grash.service.LicenseService;
 import com.grash.service.RateLimiterService;
 import com.grash.service.RequestPortalService;
 import com.grash.service.TaskService;
@@ -52,7 +50,6 @@ public class FileController {
     private final UserService userService;
     private final TaskService taskService;
     private final FileMapper fileMapper;
-    private final LicenseService licenseService;
     private final RequestPortalService requestPortalService;
     private final RateLimiterService rateLimiterService;
     private final ClientIpResolver clientIpResolver;
@@ -66,8 +63,6 @@ public class FileController {
                                               @Parameter(hidden = true) @RequestParam(value = "bypass", required =
                                                       false) Boolean bypass,
                                               @Parameter(description = "Optional task ID to associate files with") @RequestParam(value = "taskId", required = false) Integer taskId) {
-        if (!licenseService.hasEntitlement(LicenseEntitlement.FILE_ATTACHMENTS))
-            throw new CustomException("You need a license to add a file", HttpStatus.FORBIDDEN);
         User user = userService.whoami(req);
         boolean isBypass = Boolean.TRUE.equals(bypass);
         if (!rateLimiterService.tryConsumeFileUpload(String.valueOf(user.getId()), isBypass)) {
